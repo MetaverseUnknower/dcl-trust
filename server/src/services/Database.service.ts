@@ -13,6 +13,8 @@ export class DatabaseService {
       credentials?: { accessKeyId: string; secretAccessKey: string };
     };
 
+    console.log("Initializing database service in", process.env.NODE_ENV);
+
     if (isProduction) {
       // In production, assume we're running on EC2 with proper IAM role
       clientConfig = {
