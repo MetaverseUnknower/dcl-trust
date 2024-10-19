@@ -79,7 +79,7 @@ export class AuthController {
             status: 202,
             message:
               userResponse.message ||
-              "Sorry, you are not yet eligible for the CBI program.",
+              "Sorry, you are not yet eligible for the Decentraland Trust program.",
           });
         }
 

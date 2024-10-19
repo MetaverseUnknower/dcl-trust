@@ -110,7 +110,7 @@ export class UserLogic {
 
       return {
         status: 200,
-        message: "Congratulations! You are eligible for the CBI program.",
+        message: "Congratulations! You are eligible for the Decentraland Trust program.",
         user: newUser,
       };
     } catch (error) {
