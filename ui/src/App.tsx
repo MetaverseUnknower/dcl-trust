@@ -118,19 +118,9 @@ export default function App() {
       setAttemptingLogin(true);
 
       try {
-        const authResponse = await authService.restoreLoginSession();
-        const existingUser = authResponse.user && users.find((user) => user.id === authResponse.user.id);
-
-        if (authResponse.user && existingUser) {
-          setLoggedInUserId(authResponse.user.id);
-        } else if (authResponse.user && !existingUser) {
-          setUsers([...users, authResponse.user]);
-          setLoggedInUserId(authResponse.user.id);
-        }
-
         // Fetch users and CBI metrics
         await Promise.all([fetchUsers(), fetchCBIMetrics()]);
-
+        await restoreLoginSession();
         // Initialize WebSocket connection after fetching data
         initializeWebSocket();
       } catch (error: any) {
@@ -189,6 +179,22 @@ export default function App() {
       }),
     [mode]
   );
+
+  const restoreLoginSession = async () => {
+    if (!authService.getRefreshToken()) return;
+
+    const authResponse = await authService.restoreLoginSession();
+    const existingUser =
+      authResponse?.user &&
+      users.find((user) => user.id === authResponse.user.id);
+
+    if (authResponse.user && existingUser) {
+      setLoggedInUserId(authResponse.user.id);
+    } else if (authResponse.user && !existingUser) {
+      setUsers([...users, authResponse.user]);
+      setLoggedInUserId(authResponse.user.id);
+    }
+  };
 
   const showMessage = (
     message: string,
