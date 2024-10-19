@@ -11,8 +11,9 @@ services:
       - /app/node_modules
     env_file:
       - ./ui/.env
-    depends_on:
       - server
+    networks:
+      - proxy
 
   server:
     build:
@@ -26,6 +27,9 @@ services:
       - /app/node_modules
     env_file:
       - ./server/.env
+    networks:
+      - proxy
+
 
 networks:
   proxy:
