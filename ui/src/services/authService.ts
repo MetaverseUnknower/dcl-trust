@@ -72,6 +72,7 @@ export const authService = {
 
     try {
       const response = await this.refreshToken(refreshToken);
+      this.setTokens(response.accessToken, refreshToken);
       return response;
     } catch (error) {
       console.error("Error restoring login session:", error);

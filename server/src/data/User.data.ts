@@ -55,6 +55,7 @@ export class UserData {
   }
 
   static async updateUser(user: User): Promise<void> {
+    console.log(`Updating user with ID: ${user.id}, pk: ${user.pk}`);
     const params: UpdateCommandInput = {
       TableName: this.TABLE_NAME,
       Key: { pk: user.pk, id: user.id },
@@ -94,6 +95,7 @@ export class UserData {
   }
 
   static async getUser(userId: string): Promise<User | null> {
+    console.log(`Fetching user with ID: ${userId}`);
     const params = {
       TableName: this.TABLE_NAME,
       Key: { pk: "cbi:user:account", id: userId },

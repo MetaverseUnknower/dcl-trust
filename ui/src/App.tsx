@@ -118,6 +118,16 @@ export default function App() {
       setAttemptingLogin(true);
 
       try {
+        const authResponse = await authService.restoreLoginSession();
+        const existingUser = authResponse.user && users.find((user) => user.id === authResponse.user.id);
+
+        if (authResponse.user && existingUser) {
+          setLoggedInUserId(authResponse.user.id);
+        } else if (authResponse.user && !existingUser) {
+          setUsers([...users, authResponse.user]);
+          setLoggedInUserId(authResponse.user.id);
+        }
+
         // Fetch users and CBI metrics
         await Promise.all([fetchUsers(), fetchCBIMetrics()]);
 
@@ -131,6 +141,7 @@ export default function App() {
         setAttemptingLogin(false);
       }
     };
+
     fetchData();
 
     return () => {

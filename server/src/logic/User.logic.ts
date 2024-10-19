@@ -110,7 +110,8 @@ export class UserLogic {
 
       return {
         status: 200,
-        message: "Congratulations! You are eligible for the Decentraland Trust program.",
+        message:
+          "Congratulations! You are eligible for the Decentraland Trust program.",
         user: newUser,
       };
     } catch (error) {
@@ -137,8 +138,8 @@ export class UserLogic {
         user.avatar_url = userProfile?.avatar?.snapshots?.face256;
         user.decentraland_name = userProfile?.name;
 
-        await this.updateUser(user);
-        return { status: 200, message: "User Exists", user };
+        await this.updateUser(new User(user));
+        return { status: 200, message: "Welcome Back!", user };
       }
 
       // If user doesn't exist, create a new one
@@ -185,7 +186,7 @@ export class UserLogic {
         { ...fromUser, dharma_points: fromUser.dharma_points - amount },
         { ...toUser, dharma_points: toUser.dharma_points + amount },
       ];
-      
+
       WebSocketService.broadcastPointsUpdate(updatedUsers);
     } catch (error) {
       console.error("Error in user logic while gifting Dharma:", error);
