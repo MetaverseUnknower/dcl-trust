@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: dcl-cbi-ui
+    ports:
+      - "23456:80"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    env_file:
+      - ./ui/.env
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - server
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: dcl-cbi-server
+    ports:
+      - "34567:34567"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    env_file:
+      - ./server/.env
+    environment:
+      - NODE_ENV=development
