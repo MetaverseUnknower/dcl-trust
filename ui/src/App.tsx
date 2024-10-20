@@ -188,15 +188,9 @@ export default function App() {
       authResponse?.user &&
       users.find((user) => user.id === authResponse.user.id);
 
-    if (authResponse.user && existingUser) {
+    if (authResponse.user) {
       setLoggedInUserId(authResponse.user.id);
-    } else if (users.length && authResponse.user && !existingUser) {
-      setUsers([...users, authResponse.user]);
-      setLoggedInUserId(authResponse.user.id);
-    } else if (!users.length && authResponse.user && !existingUser) {
-      setLoggedInUserId(authResponse.user.id);
-      setUsers([authResponse.user]);
-    }
+    } 
   };
 
   const showMessage = (
