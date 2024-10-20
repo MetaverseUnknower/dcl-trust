@@ -6,6 +6,7 @@ import {
   Avatar,
   Box,
   Button,
+  CardActions,
 } from "@mui/material";
 import { Star, Favorite, History, CardGiftcard } from "@mui/icons-material";
 import { User } from "../services/userService";
@@ -49,7 +50,7 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
 
   return (
     <Card sx={{ mb: 2 }}>
-      <CardContent>
+      <CardContent sx={{ pb: 0 }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Avatar
             src={user.avatar_url}
@@ -63,8 +64,12 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
             <Typography variant="body1" color="textSecondary">
               Recognized Since: {new Date(user.created_at).toLocaleDateString()}
             </Typography>
-            <Typography variant="caption" color="textSecondary">
-              ID: {highlightText(user.id, searchQuery || "")}
+            <Typography
+              variant="caption"
+              color="textSecondary"
+              sx={{ fontSize: { xs: "0.7rem", lg: "1rem" } }}
+            >
+              {highlightText(user.id, searchQuery || "")}
             </Typography>
           </Box>
         </Box>
@@ -73,6 +78,7 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
             display: "flex",
             justifyContent: "space-around",
             alignItems: "center",
+            mt: 2,
           }}
         >
           <Typography
@@ -90,7 +96,9 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
           </Typography>
         </Box>
       </CardContent>
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <CardActions
+        sx={{ display: "flex", justifyContent: "space-around", pt: 0 }}
+      >
         {!isSameUser && (
           <Button
             size="small"
@@ -114,7 +122,7 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
             Send Karma
           </Button>
         )}
-      </Box>
+      </CardActions>
     </Card>
   );
 };
