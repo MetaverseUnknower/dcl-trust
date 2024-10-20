@@ -190,7 +190,7 @@ export default function App() {
 
     if (authResponse.user) {
       setLoggedInUserId(authResponse.user.id);
-    } 
+    }
   };
 
   const showMessage = (
@@ -330,6 +330,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    authService.removeTokens();
     setLoggedInUserId("Guest");
   };
 
