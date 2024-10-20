@@ -190,9 +190,12 @@ export default function App() {
 
     if (authResponse.user && existingUser) {
       setLoggedInUserId(authResponse.user.id);
-    } else if (authResponse.user && !existingUser) {
+    } else if (users.length && authResponse.user && !existingUser) {
       setUsers([...users, authResponse.user]);
       setLoggedInUserId(authResponse.user.id);
+    } else if (!users.length && authResponse.user && !existingUser) {
+      setLoggedInUserId(authResponse.user.id);
+      setUsers([authResponse.user]);
     }
   };
 
