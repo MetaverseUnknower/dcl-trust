@@ -359,12 +359,6 @@ export default function App() {
         }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          {!attemptingLogin && loggedInUserId !== "Guest" && (
-            <Button onClick={handleLogout}>
-              Logout
-            </Button>
-          )}
-          <Box></Box>
           <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
             {theme.palette.mode === "dark" ? (
               <Brightness7Icon />
@@ -372,7 +366,10 @@ export default function App() {
               <Brightness4Icon color="primary" />
             )}
           </IconButton>
-
+          <Box sx={{ flex: "1 1 auto" }}></Box>
+          {!attemptingLogin && loggedInUserId !== "Guest" && (
+            <Button onClick={handleLogout}>Logout</Button>
+          )}
           {!attemptingLogin && loggedInUserId === "Guest" && (
             <Web3Login onLogin={handleWeb3Login} />
           )}
@@ -389,7 +386,7 @@ export default function App() {
         <img
           src={mode == "dark" ? logoDark : logoLight}
           alt="Decentraland Trust"
-          style={{ margin: "0 auto", width: "700px" }}
+          style={{ margin: "0 auto", width: "700px", maxWidth: "90%" }}
         />
       </Box>
       <Container maxWidth="lg">
