@@ -360,10 +360,11 @@ export default function App() {
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           {!attemptingLogin && loggedInUserId !== "Guest" && (
-            <Button color="inherit" onClick={handleLogout}>
+            <Button onClick={handleLogout}>
               Logout
             </Button>
           )}
+          <Box></Box>
           <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
             {theme.palette.mode === "dark" ? (
               <Brightness7Icon />
