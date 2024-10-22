@@ -54,6 +54,34 @@ The UI will be available at `http://localhost:23456` (or another port if specifi
 
 ---
 
+## Docker Setup
+
+You can run the server in a Docker container for easier deployment.
+
+### 1. Build and Run the UI Container
+
+From the `ui` directory, use:
+
+```bash
+docker-compose up --build
+```
+
+### 2. Access the UI
+
+The server will be available at:
+
+- **Server**: [http://localhost:23456](http://localhost:23456)
+
+### 3. Stop the UI Container
+
+To stop the container, use:
+
+```bash
+docker-compose down
+```
+
+---
+
 ## Configuration
 
 The UI requires environment variables stored in a `.env` file. Use the `.env.example` as a starting point.
