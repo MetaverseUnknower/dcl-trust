@@ -1,0 +1,13 @@
+services:
+  ui:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: dcl-cbi-ui
+    ports:
+      - "23456:80"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    env_file:
+      - ./.env
