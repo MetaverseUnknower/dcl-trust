@@ -1,7 +1,3 @@
-Here’s a dedicated `README.md` for the **server** component of your **Decentraland Trust** project:
-
----
-
 # Decentraland Trust Server
 
 The **Decentraland Trust Server** provides the backend logic for the Decentraland Trust system. It manages reputation points, user interactions, and governance tools through APIs, and works either independently or alongside the UI. The server supports deployment using Docker for efficient production setups.
