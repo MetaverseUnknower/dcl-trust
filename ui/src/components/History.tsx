@@ -41,7 +41,8 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
       setLoading(true);
       try {
         const data = await userService.getUserTransactions(userId);
-        setTransactions(data);
+        const sortedTransactions = data.sort((a, b) => b.timestamp - a.timestamp);
+        setTransactions(sortedTransactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
       } finally {
