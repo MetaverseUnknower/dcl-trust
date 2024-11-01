@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { Star, Favorite, History } from "@mui/icons-material";
 import { User } from "../services/userService";
+import { useSharedRef } from "../App";
 
 interface LoggedInUserMetricsProps {
   user: User;
@@ -20,6 +21,19 @@ const LoggedInUserMetrics: React.FC<LoggedInUserMetricsProps> = ({
   user,
   onViewHistory,
 }) => {
+  const sharedRef = useSharedRef();
+
+  const handleScrollToTop = () => {
+    if (sharedRef.current) {
+      sharedRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleViewHistory = (userId: string) => {
+    onViewHistory(userId);
+    handleScrollToTop();
+  };
+
   return (
     <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
       <Grid container spacing={2}>
@@ -150,7 +164,7 @@ const LoggedInUserMetrics: React.FC<LoggedInUserMetricsProps> = ({
           <Button
             size="small"
             color="secondary"
-            onClick={() => onViewHistory(user.id)}
+            onClick={() => handleViewHistory(user.id)}
             startIcon={<History />}
             sx={{ m: 1 }}
           >

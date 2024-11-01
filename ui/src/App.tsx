@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  createContext,
+  useContext,
+} from "react";
 import {
   Container,
   Typography,
@@ -39,6 +45,29 @@ import GiftDialog from "./components/GiftDialog";
 function SlideTransition(props: SlideProps) {
   return <Slide {...props} direction="down" />;
 }
+
+const SharedRefContext = createContext<React.RefObject<HTMLDivElement> | null>(
+  null
+);
+
+export const SharedRefProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const topRef = useRef<HTMLDivElement>(null);
+  return (
+    <SharedRefContext.Provider value={topRef}>
+      {children}
+    </SharedRefContext.Provider>
+  );
+};
+
+export const useSharedRef = () => {
+  const context = useContext(SharedRefContext);
+  if (context === null) {
+    throw new Error("useSharedRef must be used within a SharedRefProvider");
+  }
+  return context;
+};
 
 export default function App() {
   const [users, setUsers] = useState<User[]>([]);
@@ -356,6 +385,7 @@ export default function App() {
     setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
   };
 
+
   const handleViewHistory = (userId: string) => {
     setSelectedUserId(userId);
   };
@@ -364,164 +394,170 @@ export default function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AppBar
-        position="static"
-        sx={{
-          backgroundColor: "transparent",
-          boxShadow: "none",
-          backgroundImage: "none",
-        }}
-      >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
-            {theme.palette.mode === "dark" ? (
-              <Brightness7Icon />
-            ) : (
-              <Brightness4Icon color="primary" />
-            )}
-          </IconButton>
-          <Box sx={{ flex: "1 1 auto" }}></Box>
-          {!attemptingLogin && loggedInUserId !== "Guest" && (
-            <Button onClick={handleLogout}>Logout</Button>
-          )}
-          {!attemptingLogin && loggedInUserId === "Guest" && (
-            <Web3Login onLogin={handleWeb3Login} />
-          )}
-        </Toolbar>
-      </AppBar>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          mt: 2,
-        }}
-      >
-        <img
-          src={mode == "dark" ? logoDark : logoLight}
-          alt="Decentraland Trust"
-          style={{ margin: "0 auto", width: "700px", maxWidth: "90%" }}
-        />
-      </Box>
-      <Container maxWidth="lg">
-        <Grid container spacing={3} sx={{ mt: 3 }}>
-          <Grid item xs={12}>
-            {currentUser && loggedInUserId !== "Guest" && (
-              <LoggedInUserMetrics
-                user={currentUser}
-                onViewHistory={handleViewHistory}
-              />
-            )}
-          </Grid>
-          <Grid item xs={12} md={6}>
-            {selectedUserId ? (
-              <History
-                userId={selectedUserId}
-                username={
-                  users.find((u) => u.id === selectedUserId)?.username || ""
-                }
-                users={[...users]}
-                onClose={handleCloseHistory}
-              />
-            ) : cbiMetrics ? (
-              <CbiInfo
-                dharmaRate={cbiMetrics.dharma_accrual_rate}
-                karmaRate={cbiMetrics.karma_decay_rate}
-                programStart={cbiMetrics.program_start}
-                lastCalculation={cbiMetrics.last_calculation}
-              />
-            ) : null}
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} sx={{ p: 3 }}>
-              <Typography variant="h4" gutterBottom align="center">
-                Our Community Guardians
-              </Typography>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Search users by Name or Wallet Address"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                style={{ marginBottom: "20px" }}
-              />
-              {isLoading ? (
-                <Box display="flex" justifyContent="center" my={4}>
-                  <CircularProgress />
-                </Box>
-              ) : filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <UserMetrics
-                    key={user.id}
-                    user={user}
-                    currentUser={currentUser}
-                    onGiftDharma={handleGiftDharma}
-                    onViewHistory={handleViewHistory}
-                    canGift={
-                      !!currentUser &&
-                      currentUser?.dharma_points >= 1 &&
-                      loggedInUserId !== "Guest"
-                    }
-                    isSameUser={user.id === loggedInUserId}
-                    searchQuery={searchQuery}
-                  />
-                ))
-              ) : (
-                <Box my={4} justifyContent={"center"} alignItems={"center"}>
-                  {searchQuery && searchQuery.includes("0x") && (
-                    <Typography align="center">
-                      No users found for that wallet address.
-                    </Typography>
-                  )}
-                  {searchQuery && !searchQuery.includes("0x") && (
-                    <Typography align="center">
-                      No users matched <strong>{searchQuery}</strong>.
-                    </Typography>
-                  )}
-                  {!searchQuery && (
-                    <Typography align="center">No users found.</Typography>
-                  )}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
-      </Container>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={5000}
-        onClose={hideMessage}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        TransitionComponent={SlideTransition}
-      >
-        <Alert
-          onClose={hideMessage}
-          severity={snackbar.severity}
+    <SharedRefProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AppBar
+          position="static"
           sx={{
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            "& .MuiAlert-message": {
-              fontSize: "1.2rem", // Increase message font size
-            },
-            "& .MuiAlert-icon": {
-              fontSize: "2rem", // Increase icon size
-            },
-            padding: "1rem", // Increase overall padding
+            backgroundColor: "transparent",
+            boxShadow: "none",
+            backgroundImage: "none",
           }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </ThemeProvider>
+          <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+            <IconButton
+              sx={{ ml: 1 }}
+              onClick={toggleColorMode}
+              color="inherit"
+            >
+              {theme.palette.mode === "dark" ? (
+                <Brightness7Icon />
+              ) : (
+                <Brightness4Icon color="primary" />
+              )}
+            </IconButton>
+            <Box sx={{ flex: "1 1 auto" }}></Box>
+            {!attemptingLogin && loggedInUserId !== "Guest" && (
+              <Button onClick={handleLogout}>Logout</Button>
+            )}
+            {!attemptingLogin && loggedInUserId === "Guest" && (
+              <Web3Login onLogin={handleWeb3Login} />
+            )}
+          </Toolbar>
+        </AppBar>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mt: 2,
+          }}
+        >
+          <img
+            src={mode == "dark" ? logoDark : logoLight}
+            alt="Decentraland Trust"
+            style={{ margin: "0 auto", width: "700px", maxWidth: "90%" }}
+          />
+        </Box>
+        <Container maxWidth="lg">
+          <Grid container spacing={3} sx={{ mt: 3 }}>
+            <Grid item xs={12}>
+              {currentUser && loggedInUserId !== "Guest" && (
+                <LoggedInUserMetrics
+                  user={currentUser}
+                  onViewHistory={handleViewHistory}
+                />
+              )}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              {selectedUserId ? (
+                <History
+                  userId={selectedUserId}
+                  username={
+                    users.find((u) => u.id === selectedUserId)?.username || ""
+                  }
+                  users={[...users]}
+                  onClose={handleCloseHistory}
+                />
+              ) : cbiMetrics ? (
+                <CbiInfo
+                  dharmaRate={cbiMetrics.dharma_accrual_rate}
+                  karmaRate={cbiMetrics.karma_decay_rate}
+                  programStart={cbiMetrics.program_start}
+                  lastCalculation={cbiMetrics.last_calculation}
+                />
+              ) : null}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Paper elevation={3} sx={{ p: 3 }}>
+                <Typography variant="h4" gutterBottom align="center">
+                  Our Community Guardians
+                </Typography>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Search users by Name or Wallet Address"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  style={{ marginBottom: "20px" }}
+                />
+                {isLoading ? (
+                  <Box display="flex" justifyContent="center" my={4}>
+                    <CircularProgress />
+                  </Box>
+                ) : filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <UserMetrics
+                      key={user.id}
+                      user={user}
+                      currentUser={currentUser}
+                      onGiftDharma={handleGiftDharma}
+                      onViewHistory={handleViewHistory}
+                      canGift={
+                        !!currentUser &&
+                        currentUser?.dharma_points >= 1 &&
+                        loggedInUserId !== "Guest"
+                      }
+                      isSameUser={user.id === loggedInUserId}
+                      searchQuery={searchQuery}
+                    />
+                  ))
+                ) : (
+                  <Box my={4} justifyContent={"center"} alignItems={"center"}>
+                    {searchQuery && searchQuery.includes("0x") && (
+                      <Typography align="center">
+                        No users found for that wallet address.
+                      </Typography>
+                    )}
+                    {searchQuery && !searchQuery.includes("0x") && (
+                      <Typography align="center">
+                        No users matched <strong>{searchQuery}</strong>.
+                      </Typography>
+                    )}
+                    {!searchQuery && (
+                      <Typography align="center">No users found.</Typography>
+                    )}
+                  </Box>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+        </Container>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={5000}
+          onClose={hideMessage}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          TransitionComponent={SlideTransition}
+        >
+          <Alert
+            onClose={hideMessage}
+            severity={snackbar.severity}
+            sx={{
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+              "& .MuiAlert-message": {
+                fontSize: "1.2rem", // Increase message font size
+              },
+              "& .MuiAlert-icon": {
+                fontSize: "2rem", // Increase icon size
+              },
+              padding: "1rem", // Increase overall padding
+            }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </ThemeProvider>
+    </SharedRefProvider>
   );
 }

@@ -11,6 +11,7 @@ import {
 import { Star, Favorite, History, CardGiftcard } from "@mui/icons-material";
 import { User } from "../services/userService";
 import GiftDialog from "./GiftDialog";
+import { useSharedRef } from "../App";
 
 interface UserMetricsProps {
   user: User;
@@ -41,6 +42,7 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
 }) => {
   const [showGiftDialog, setShowGiftDialog] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
+  const sharedRef = useSharedRef();
 
   const highlightText = (text: string, highlight: string) => {
     if (!highlight.trim()) {
@@ -81,6 +83,18 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
     setSelectedUser(recipient);
     setShowGiftDialog(true);
   };
+
+
+  const handleScrollToTop = () => {
+    if (sharedRef.current) {
+      sharedRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleViewHistory = (userId: string) => {
+    onViewHistory(userId);
+    handleScrollToTop();
+  }
 
   return (
     <>
@@ -140,7 +154,7 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
             <Button
               size="small"
               color="info"
-              onClick={() => onViewHistory(user.id)}
+              onClick={() => handleViewHistory(user.id)}
               startIcon={<History />}
               sx={{ mx: 4, my: 2, px: 2 }}
             >

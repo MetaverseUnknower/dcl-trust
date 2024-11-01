@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useRef } from "react";
 import {
   Paper,
   Typography,
@@ -19,6 +19,7 @@ import {
   Favorite,
   Star,
 } from "@mui/icons-material";
+import { SharedRefProvider, useSharedRef } from "../App";
 
 interface TransactionHistoryProps {
   users: User[];
@@ -35,6 +36,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
 }) => {
   const [transactions, setTransactions] = useState<DharmaTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const sharedRef = useSharedRef();
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -87,93 +89,97 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
   };
 
   return (
-    <Paper
-      sx={{ p: 2, height: "100%", overflowY: "auto", position: "relative" }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "end",
-          alignItems: "center",
-          mb: 2,
-        }}
+    <SharedRefProvider>
+      <Paper
+        sx={{ p: 2, height: "100%", overflowY: "auto", position: "relative" }} ref={sharedRef}
       >
-        <IconButton onClick={onClose} color="inherit">
-          <CloseIcon />
-        </IconButton>
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <Typography variant="h6" align="center">
-          Gifting History for {username}
-        </Typography>
-      </Box>
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        {loading ? (
-          <CircularProgress />
-        ) : transactions.length > 0 ? (
-          <List
-            sx={{ display: "flex", flexDirection: "column", width: "100%" }}
-          >
-            {transactions.map((transaction, index) => {
-              if (transaction.fromUserId === userId) {
-                return (
-                  <ListItem
-                    key={index}
-                    sx={{ justifyContent: "start", alignItems: "center" }}
-                  >
-                    <Star sx={{ mt: -2, mr: 2 }} color="primary" />
-                    <ListItemText
-                      primary={`Awarded ${transaction.amount} Dharma point${
-                        transaction.amount > 1 ? "s" : ""
-                      } to ${getUsername(transaction.toUserId)}`}
-                      secondary={renderSecondaryText(transaction)}
-                      sx={{
-                        textAlign: "left",
-                        color: "#90caf9",
-                      }}
-                    />
-                  </ListItem>
-                );
-              } else if (transaction.fromUserId !== userId) {
-                return (
-                  <>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <IconButton onClick={onClose} color="inherit">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography variant="h6" align="center">
+            Gifting History for {username}
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          {loading ? (
+            <CircularProgress />
+          ) : transactions.length > 0 ? (
+            <List
+              sx={{ display: "flex", flexDirection: "column", width: "100%" }}
+            >
+              {transactions.map((transaction, index) => {
+                if (transaction.fromUserId === userId) {
+                  return (
                     <ListItem
                       key={index}
-                      sx={{ justifyContent: "end", alignItems: "center" }}
+                      sx={{ justifyContent: "start", alignItems: "center" }}
                     >
+                      <Star sx={{ mt: -2, mr: 2 }} color="primary" />
                       <ListItemText
-                        color="pink"
-                        primary={`${getUsername(
-                          transaction.fromUserId
-                        )} awarded ${transaction.amount} Karma point${
+                        key={index}
+                        primary={`Awarded ${transaction.amount} Dharma point${
                           transaction.amount > 1 ? "s" : ""
-                        }`}
+                        } to ${getUsername(transaction.toUserId)}`}
                         secondary={renderSecondaryText(transaction)}
                         sx={{
-                          textAlign: "right",
-                          color: "#ce93d8",
-                          flex: "0 0 auto",
+                          textAlign: "left",
+                          color: "#90caf9",
                         }}
                       />
-                      <Favorite sx={{ mt: -2, ml: 2 }} color="secondary" />
                     </ListItem>
-                  </>
-                );
-              }
-            })}
-          </List>
-        ) : (
-          <Typography>No transactions found.</Typography>
-        )}
-      </Box>
-    </Paper>
+                  );
+                } else if (transaction.fromUserId !== userId) {
+                  return (
+                    <>
+                      <ListItem
+                        key={index}
+                        sx={{ justifyContent: "end", alignItems: "center" }}
+                      >
+                        <ListItemText
+                          key={index}
+                          color="pink"
+                          primary={`${getUsername(
+                            transaction.fromUserId
+                          )} awarded ${transaction.amount} Karma point${
+                            transaction.amount > 1 ? "s" : ""
+                          }`}
+                          secondary={renderSecondaryText(transaction)}
+                          sx={{
+                            textAlign: "right",
+                            color: "#ce93d8",
+                            flex: "0 0 auto",
+                          }}
+                        />
+                        <Favorite sx={{ mt: -2, ml: 2 }} color="secondary" />
+                      </ListItem>
+                    </>
+                  );
+                }
+              })}
+            </List>
+          ) : (
+            <Typography>No transactions found.</Typography>
+          )}
+        </Box>
+      </Paper>
+    </SharedRefProvider>
   );
 };
 
