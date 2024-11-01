@@ -12,6 +12,7 @@ import {
   FormControl,
   SelectChangeEvent,
   Typography,
+  FormHelperText,
 } from "@mui/material";
 import { User } from "../services/userService";
 
@@ -84,6 +85,18 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
           multiline
           rows={4}
           margin="normal"
+          inputProps={{ maxLength: 500 }}
+          helperText={
+            <FormHelperText
+              style={{
+                color: reason.length >= 200 ? "red" : "inherit",
+                textAlign: "right",
+                marginRight: 0
+              }}
+            >
+              {reason.length}/500 characters
+            </FormHelperText>
+          }
         />
       </DialogContent>
       <DialogActions>

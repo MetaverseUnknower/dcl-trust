@@ -67,6 +67,8 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
             color: "#ccc",
             flex: "0 0 auto",
             fontSize: "0.8rem",
+            textWrap: "wrap",
+            maxWidth: "250px",
           }}
         >
           {transaction.reason || "No reason provided"}
