@@ -59,9 +59,11 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Give {targetUser?.username || "Someone"} Karma</DialogTitle>
+      <DialogTitle>
+        Send Karma to {targetUser?.username || "Someone"}
+      </DialogTitle>
       <DialogContent>
-        <Typography>
+        <Typography sx={{ mb: 1 }}>
           Your dharma points will convert to karma once sent to{" "}
           {targetUser?.username}
         </Typography>
