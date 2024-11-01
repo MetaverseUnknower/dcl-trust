@@ -41,7 +41,9 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
       setLoading(true);
       try {
         const data = await userService.getUserTransactions(userId);
-        const sortedTransactions = data.sort((a, b) => b.timestamp - a.timestamp);
+        const sortedTransactions = data.sort(
+          (a, b) => b.timestamp - a.timestamp
+        );
         setTransactions(sortedTransactions);
       } catch (error) {
         console.error("Error fetching transactions:", error);
@@ -57,6 +59,31 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
     return users.find((user) => user.id === userId)?.username || userId;
   };
 
+  const renderSecondaryText = (transaction: DharmaTransaction) => {
+    return (
+      <>
+        <Typography
+          sx={{
+            color: "#ccc",
+            flex: "0 0 auto",
+            fontSize: "0.8rem",
+          }}
+        >
+          {transaction.reason || "No reason provided"}
+        </Typography>
+        <Typography
+          sx={{
+            color: "#ccc",
+            flex: "0 0 auto",
+            fontSize: "0.6rem",
+          }}
+        >
+          {new Date(transaction.timestamp).toLocaleString()}
+        </Typography>
+      </>
+    );
+  };
+
   return (
     <Paper
       sx={{ p: 2, height: "100%", overflowY: "auto", position: "relative" }}
@@ -69,7 +96,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
           mb: 2,
         }}
       >
-        <IconButton onClick={onClose} color="inherit" >
+        <IconButton onClick={onClose} color="inherit">
           <CloseIcon />
         </IconButton>
       </Box>
@@ -104,9 +131,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                       primary={`Awarded ${transaction.amount} Dharma point${
                         transaction.amount > 1 ? "s" : ""
                       } to ${getUsername(transaction.toUserId)}`}
-                      secondary={new Date(
-                        transaction.timestamp
-                      ).toLocaleString()}
+                      secondary={renderSecondaryText(transaction)}
                       sx={{
                         textAlign: "left",
                         color: "#90caf9",
@@ -116,28 +141,28 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({
                 );
               } else if (transaction.fromUserId !== userId) {
                 return (
-                  <ListItem
-                    key={index}
-                    sx={{ justifyContent: "end", alignItems: "center" }}
-                  >
-                    <ListItemText
-                      color="pink"
-                      primary={`${getUsername(
-                        transaction.fromUserId
-                      )} awarded ${transaction.amount} Karma point${
-                        transaction.amount > 1 ? "s" : ""
-                      }`}
-                      secondary={new Date(
-                        transaction.timestamp
-                      ).toLocaleString()}
-                      sx={{
-                        textAlign: "right",
-                        color: "#ce93d8",
-                        flex: "0 0 auto",
-                      }}
-                    />
-                    <Favorite sx={{ mt: -2, ml: 2 }} color="secondary" />
-                  </ListItem>
+                  <>
+                    <ListItem
+                      key={index}
+                      sx={{ justifyContent: "end", alignItems: "center" }}
+                    >
+                      <ListItemText
+                        color="pink"
+                        primary={`${getUsername(
+                          transaction.fromUserId
+                        )} awarded ${transaction.amount} Karma point${
+                          transaction.amount > 1 ? "s" : ""
+                        }`}
+                        secondary={renderSecondaryText(transaction)}
+                        sx={{
+                          textAlign: "right",
+                          color: "#ce93d8",
+                          flex: "0 0 auto",
+                        }}
+                      />
+                      <Favorite sx={{ mt: -2, ml: 2 }} color="secondary" />
+                    </ListItem>
+                  </>
                 );
               }
             })}

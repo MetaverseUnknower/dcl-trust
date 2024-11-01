@@ -6,15 +6,19 @@ export class HistoryLogic {
   static async logDharmaGift(
     fromUserId: string,
     toUserId: string,
-    amount: number
+    amount: number,
+    reason: string
   ): Promise<void> {
     try {
       const log: Omit<DharmaGiftLog, "sk"> = {
         fromUserId,
         toUserId,
         amount,
+        reason,
         timestamp: Date.now(),
       };
+
+      console.log("Logging Dharma gift:", log);
 
       await HistoryData.logDharmaGift(log);
     } catch (error) {

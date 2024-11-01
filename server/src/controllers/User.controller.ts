@@ -57,10 +57,11 @@ export class UserController {
 
   static async giftDharma(req: Request, res: Response) {
     try {
-      const { toUserId, amount } = req.body;
+      const { recipientId, amount, reason } = req.body;
       const fromUser = req.user as User;
+      console.log(reason);
 
-      if (!toUserId || amount === undefined) {
+      if (!recipientId || amount === undefined) {
         return res.status(400).json({ error: "Missing required parameters" });
       }
 
@@ -68,7 +69,7 @@ export class UserController {
         return res.status(403).json({ error: "Forbidden" });
       }
 
-      if (toUserId.toLowerCase() === fromUser.id.toLowerCase()) {
+      if (recipientId.toLowerCase() === fromUser.id.toLowerCase()) {
         return res
           .status(403)
           .json({ error: "Cannot gift Dharma points to yourself" });
@@ -76,14 +77,15 @@ export class UserController {
 
       await UserLogic.giftDharma(
         fromUser,
-        toUserId.toLowerCase(),
-        Number(amount)
+        recipientId.toLowerCase(),
+        Number(amount),
+        reason
       );
 
       const updatedFromUser = await UserLogic.getUser(
           fromUser.id.toLowerCase()
         ),
-        updatedToUser = await UserLogic.getUser(toUserId.toLowerCase());
+        updatedToUser = await UserLogic.getUser(recipientId.toLowerCase());
 
       res.json({
         message: "Dharma points gifted successfully",

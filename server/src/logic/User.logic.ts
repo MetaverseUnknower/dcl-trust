@@ -157,7 +157,8 @@ export class UserLogic {
   static async giftDharma(
     fromUser: User,
     toUserId: string,
-    amount: number
+    amount: number,
+    reason: string
   ): Promise<void> {
     try {
       const fromUserId = fromUser.id;
@@ -180,7 +181,7 @@ export class UserLogic {
       await UserData.giftDharma(fromUserId, toUserId, amount);
 
       // Log the Dharma gift
-      await HistoryLogic.logDharmaGift(fromUserId, toUserId, amount);
+      await HistoryLogic.logDharmaGift(fromUserId, toUserId, amount, reason);
 
       const updatedUsers = [
         { ...fromUser, dharma_points: fromUser.dharma_points - amount },

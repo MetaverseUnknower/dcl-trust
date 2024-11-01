@@ -22,10 +22,16 @@ export const userService = {
     return response.data;
   },
 
-  async giftDharma(
-    toUserId: string,
-    amount: number
-  ): Promise<{ message: string; fromUser: User; toUser: User }> {
+  async giftDharma({
+    recipientId,
+    reason,
+    amount,
+  }: {
+    recipientId: string;
+    reason: string;
+    amount: number;
+  }): Promise<{ message: string; fromUser: User; toUser: User }> {
+    console.log("Gifting Dharma to", recipientId, "with reason:", reason, "and amount:", amount);
     const accessToken = authService.getAccessToken();
     if (!accessToken) {
       throw new Error("User must be logged in to gift Dharma");
@@ -34,7 +40,7 @@ export const userService = {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/users/gift-dharma`,
-        { toUserId, amount },
+        { recipientId, reason, amount },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

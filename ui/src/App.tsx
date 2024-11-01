@@ -34,6 +34,7 @@ import { CBIMetrics, statsService } from "./services/statsService";
 import { webSocket } from "./services/websocketService";
 import logoLight from "./assets/images/logo-light.png";
 import logoDark from "./assets/images/logo-dark.png";
+import GiftDialog from "./components/GiftDialog";
 
 function SlideTransition(props: SlideProps) {
   return <Slide {...props} direction="down" />;
@@ -213,7 +214,15 @@ export default function App() {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleGiftDharma = async (recipientId: string) => {
+  const handleGiftDharma = async ({
+    recipientId,
+    reason,
+    amount,
+  }: {
+    recipientId: string;
+    reason: string;
+    amount: number;
+  }) => {
     if (loggedInUserId === "Guest") {
       showMessage("You must be logged in to gift Dharma.", "error");
       return;
@@ -225,7 +234,11 @@ export default function App() {
     }
 
     try {
-      const giftDharmaResponse = await userService.giftDharma(recipientId, 1);
+      const giftDharmaResponse = await userService.giftDharma({
+        recipientId,
+        reason,
+        amount,
+      });
       showMessage(giftDharmaResponse.message, "success");
       const fromUser = giftDharmaResponse.fromUser;
       const toUser = giftDharmaResponse.toUser;
@@ -450,6 +463,7 @@ export default function App() {
                   <UserMetrics
                     key={user.id}
                     user={user}
+                    currentUser={currentUser}
                     onGiftDharma={handleGiftDharma}
                     onViewHistory={handleViewHistory}
                     canGift={
