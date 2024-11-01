@@ -13,7 +13,7 @@ export interface DharmaGiftLog {
 }
 
 export class HistoryData {
-  private static readonly TABLE_NAME = "CBI_History";
+  private static readonly TABLE_NAME = process.env.NODE_ENV === "production" ? "CBI_History" : "CBI_History_Dev";
 
   static async logDharmaGift(log: Omit<DharmaGiftLog, "sk">): Promise<void> {
     const dynamoDB = databaseService.getDynamoDbClient();

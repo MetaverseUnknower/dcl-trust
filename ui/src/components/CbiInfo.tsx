@@ -222,7 +222,13 @@ const CbiInfo: React.FC<CbiInfoProps> = ({
         <List>
           <ListItem>
             <ListItemText
-              primary="Round One Starts:"
+              primary="Welcome To Round One!"
+              secondary="The Genesis Round"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemText
+              primary="Round One Began:"
               secondary={`${formatUTCDate(programStart)} (${new Date(
                 programStart
               ).toLocaleString()})`}

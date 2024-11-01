@@ -12,6 +12,7 @@ import {
 import { WebSocketService } from "./Websocket.service";
 
 const dynamoDB = databaseService.getDynamoDbClient();
+let interval: NodeJS.Timeout;
 
 export class DharmaAccrualService {
   private static readonly CBI_METRICS_TABLE = "CBI_Metrics";
@@ -176,7 +177,17 @@ export class DharmaAccrualService {
         );
         throw error;
       }
+
+      // Clear the interval and set a new one after the first successful batch
+      clearInterval(interval);
+
+      // Broadcast the updated points to all clients
       WebSocketService.broadcastPointsUpdate(updatedUsers, currentTime);
+
+      // Set a new interval to broadcast points every 15 seconds
+      interval = setInterval(() => {
+        WebSocketService.broadcastPointsUpdate(updatedUsers, currentTime);
+      }, 15000);
     }
   }
 

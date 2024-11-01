@@ -66,53 +66,56 @@ export default function App() {
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
 
-  useEffect(() => {
-    const initializeWebSocket = async () => {
-      webSocket.setOnMessage((event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "update_points") {
-          console.log("Received updated points:", data);
+  const initializeWebSocket = async () => {
+    webSocket.setOnMessage((event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "update_points") {
+        console.log("Received updated points:", data);
 
-          if (data.users.length === 0) {
-            console.log("No users to update..?");
-            return;
-          }
-
-          // Use a functional update to ensure the latest value of `users` is used.
-          setUsers((prevUsers) => {
-            const updatedUsers = data.users
-              .map((user: Partial<User>) => {
-                let updatedUser = users.find(
-                  (storedUser) => storedUser.id === user.id
-                );
-
-                if (updatedUser) {
-                  return { ...updatedUser, ...user };
-                }
-                return undefined;
-              })
-              .filter((user: User) => user !== undefined);
-
-            const sortedUsers = [...updatedUsers].sort(
-              (a, b) => b.karma_points - a.karma_points
-            );
-
-            return sortedUsers;
-          });
+        if (data.users.length === 0) {
+          console.log("No users to update..?");
+          return;
         }
-      });
 
-      webSocket.setOnOpen((event) => {
-        console.log("WebSocket connection opened:", event);
-      });
-      webSocket.setOnClose((event) => {
-        console.log("WebSocket connection closed:", event);
-      });
-      webSocket.setOnError((error) => {
-        console.error("WebSocket error:", error);
-      });
-    };
+        // Use a functional update to ensure the latest value of `users` is used.
+        setUsers((prevUsers) => {
+          const updatedUsers = data.users
+            .map((user: Partial<User>) => {
+              let updatedUser = prevUsers.find(
+                (storedUser) => storedUser.id === user.id
+              );
 
+              if (updatedUser) {
+                return { ...updatedUser, ...user };
+              }
+              return undefined;
+            })
+            .filter((user: User) => user !== undefined);
+
+          const sortedUsers = [...updatedUsers].sort(
+            (a, b) => b.karma_points - a.karma_points
+          );
+
+          return sortedUsers;
+        });
+      }
+    });
+
+    webSocket.setOnOpen((event) => {
+      if (process.env.NODE_ENV === "production") return;
+      console.log("WebSocket connection opened:", event);
+    });
+    webSocket.setOnClose((event) => {
+      if (process.env.NODE_ENV === "production") return;
+      console.log("WebSocket connection closed:", event);
+    });
+    webSocket.setOnError((error) => {
+      if (process.env.NODE_ENV === "production") return;
+      console.error("WebSocket error:", error);
+    });
+  };
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setAttemptingLogin(true);
@@ -135,13 +138,14 @@ export default function App() {
     fetchData();
 
     return () => {
-      console.log("Component unmounted - Cleaning up WebSocket handlers");
-
       // Remove WebSocket event handlers to avoid memory leaks
       webSocket.setOnMessage(null);
       webSocket.setOnOpen(null);
       webSocket.setOnClose(null);
       webSocket.setOnError(null);
+
+      if (process.env.NODE_ENV === "production") return;
+      console.log("Component unmounted - Cleaning up WebSocket handlers");
     };
   }, []);
 
@@ -163,7 +167,6 @@ export default function App() {
         user?.username?.toLowerCase().includes(lowercasedQuery) ||
         user?.id?.toLowerCase().includes(lowercasedQuery)
     );
-    console.log("Filtered users:", filtered);
     const sortedUsers = [...filtered].sort(
       (a, b) => b.karma_points - a.karma_points
     );

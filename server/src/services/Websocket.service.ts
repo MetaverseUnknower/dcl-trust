@@ -72,9 +72,13 @@ export class WebSocketService {
     }[],
     last_calculation?: number
   ) {
+    console.log("Broadcasting points update to clients", users, last_calculation);
     if (this.wss) {
+      console.log("this.wss exists");
       this.wss.clients.forEach((client) => {
+        console.log("client.readyState: ", client.readyState);
         if (client.readyState === WebSocket.OPEN) {
+          console.log("Sending points update to client");
           client.send(
             JSON.stringify({
               type: "update_points",

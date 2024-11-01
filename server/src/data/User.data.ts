@@ -38,7 +38,7 @@ export class User {
 }
 
 export class UserData {
-  public static readonly TABLE_NAME = "CBI_Users";
+  public static readonly TABLE_NAME = process.env.NODE_ENV === "production" ? "CBI_Users" : "CBI_Users_Dev";
 
   static async createUser(user: User): Promise<void> {
     const params = {
