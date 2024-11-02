@@ -35,7 +35,9 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
   giftingUser,
   targetUser,
 }) => {
-  const [selectedNumber, setSelectedNumber] = useState<number>(1);
+  const [selectedNumber, setSelectedNumber] = useState<number>(
+    Math.min(giftingUser?.dharma_points || 1, 1)
+  );
   const [reason, setReason] = useState<string>("");
   const maxNumber = Math.floor(giftingUser?.dharma_points || 0);
 
@@ -74,7 +76,7 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
           type="number"
           value={selectedNumber}
           onChange={handleNumberChange}
-          inputProps={{ min: 1, max: maxNumber }}
+          inputProps={{ min: 0.01, max: maxNumber }}
           fullWidth
           margin="normal"
         />
@@ -92,7 +94,7 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
               style={{
                 color: reason.length >= 200 ? "red" : "inherit",
                 textAlign: "right",
-                marginRight: 0
+                marginRight: 0,
               }}
             >
               {reason.length}/500 characters
