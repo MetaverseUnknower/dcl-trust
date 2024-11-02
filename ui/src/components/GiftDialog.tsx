@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -39,8 +39,13 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
     Math.min(giftingUser?.dharma_points || 1, 1)
   );
   const [reason, setReason] = useState<string>("");
-  const maxNumber = Math.floor(giftingUser?.dharma_points || 0);
+  const maxNumber = Math.floor(giftingUser?.dharma_points || 10);
 
+  useEffect(() => {
+    setSelectedNumber(Math.min(giftingUser?.dharma_points || 1, 1));
+  }, [giftingUser?.dharma_points]);
+
+  console.log("selectedNumber", selectedNumber); // Debugging
   const handleNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value).toFixed(2);
     setSelectedNumber(Number(value));
@@ -76,7 +81,7 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
           type="number"
           value={selectedNumber}
           onChange={handleNumberChange}
-          inputProps={{ min: 0.01, max: maxNumber }}
+          inputProps={{ min: 0.01, max: maxNumber, step: 0.01 }}
           fullWidth
           margin="normal"
         />

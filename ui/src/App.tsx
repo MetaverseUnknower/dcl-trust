@@ -555,7 +555,7 @@ export default function App() {
                       onViewHistory={handleViewHistory}
                       canGift={
                         !!currentUser &&
-                        currentUser?.dharma_points >= 0 &&
+                        currentUser?.dharma_points > 0 &&
                         loggedInUserId !== "Guest"
                       }
                       isSameUser={user.id === loggedInUserId}
