@@ -40,7 +40,8 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
   const maxNumber = Math.floor(giftingUser?.dharma_points || 0);
 
   const handleNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedNumber(Number(event.target.value));
+    const value = Number(event.target.value).toFixed(2);
+    setSelectedNumber(Number(value));
   };
 
   const handleReasonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
