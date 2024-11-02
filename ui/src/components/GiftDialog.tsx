@@ -42,7 +42,11 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
   const maxNumber = Math.floor(giftingUser?.dharma_points || 10);
 
   useEffect(() => {
-    setSelectedNumber(Math.min(giftingUser?.dharma_points || 1, 1));
+    if (!open) {
+      setSelectedNumber(0);
+    } else {
+      setSelectedNumber(Math.min(giftingUser?.dharma_points || 1, 1));
+    }
   }, [open]);
 
   console.log("selectedNumber", selectedNumber); // Debugging
