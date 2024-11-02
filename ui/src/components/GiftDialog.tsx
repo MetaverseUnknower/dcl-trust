@@ -43,7 +43,7 @@ const ChooseNumberDialog: React.FC<ChooseNumberDialogProps> = ({
 
   useEffect(() => {
     setSelectedNumber(Math.min(giftingUser?.dharma_points || 1, 1));
-  }, [giftingUser?.dharma_points]);
+  }, [open]);
 
   console.log("selectedNumber", selectedNumber); // Debugging
   const handleNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
