@@ -5,28 +5,49 @@ import {
   Avatar,
   Box,
   Button,
-  Container,
   Grid,
+  Dialog,
+  Select,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  MenuItem,
 } from "@mui/material";
-import { Star, Favorite, History } from "@mui/icons-material";
-import { User } from "../services/userService";
+import { Star, Favorite, History, EditNote } from "@mui/icons-material";
+import { User, userService } from "../services/userService";
 import { useSharedRef } from "../App";
 
 interface LoggedInUserMetricsProps {
   user: User;
   onViewHistory: (userId: string) => void;
+  onUpdateDisplayName: (displayName: string) => void;
 }
 
 const LoggedInUserMetrics: React.FC<LoggedInUserMetricsProps> = ({
   user,
   onViewHistory,
+  onUpdateDisplayName,
 }) => {
+  const [showEditDisplayName, setShowEditDisplayName] = React.useState(false);
+  const [displayName, setDisplayName] = React.useState(user.username);
   const sharedRef = useSharedRef();
 
   const handleScrollToTop = () => {
     if (sharedRef.current) {
       sharedRef.current.scrollIntoView({ behavior: "smooth" });
     }
+  };
+
+  const handleEditDisplayName = (userId: string) => {
+    setShowEditDisplayName(true);
+  };
+
+  const handleSaveDisplayName = async () => {
+    setShowEditDisplayName(false);
+    onUpdateDisplayName(displayName);
   };
 
   const handleViewHistory = (userId: string) => {
@@ -163,6 +184,15 @@ const LoggedInUserMetrics: React.FC<LoggedInUserMetricsProps> = ({
         >
           <Button
             size="small"
+            color="primary"
+            onClick={() => handleEditDisplayName(user.id)}
+            startIcon={<EditNote />}
+            sx={{ m: 1 }}
+          >
+            Edit Display Name
+          </Button>
+          <Button
+            size="small"
             color="secondary"
             onClick={() => handleViewHistory(user.id)}
             startIcon={<History />}
@@ -172,6 +202,52 @@ const LoggedInUserMetrics: React.FC<LoggedInUserMetricsProps> = ({
           </Button>
         </Grid>
       </Grid>
+      <Dialog
+        open={showEditDisplayName}
+        onClose={() => setShowEditDisplayName(false)}
+      >
+        <DialogTitle>Edit Display Name</DialogTitle>
+        <DialogContent>
+          <Box sx={{ p: 2 }}>
+            <DialogContentText variant="body1" align="center" gutterBottom>
+              Choose the name you'd like to show on Decentraland Trust
+            </DialogContentText>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="display-name-label">Display Name</InputLabel>
+              <Select
+                labelId="display-name-label"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                label="Display Name"
+                fullWidth
+              >
+                {user.decentraland_names &&
+                user.decentraland_names.length > 0 ? (
+                  user.decentraland_names.map((name: string) => (
+                    <MenuItem key={name} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem value={user.username}>{user.username}</MenuItem>
+                )}
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowEditDisplayName(false)} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveDisplayName}
+            color="primary"
+            variant="contained"
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };

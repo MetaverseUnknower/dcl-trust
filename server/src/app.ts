@@ -20,6 +20,7 @@ app.post("/auth/refresh", AuthController.refreshToken);
 
 // User endpoints
 app.get("/users", UserController.getAllUsers);
+app.post("/users/update-display-name", authMiddleware, UserController.updateUserDisplayName);
 app.post("/users/gift-dharma", authMiddleware, UserController.giftDharma);
 app.get("/users/:userId", UserController.getOrCreateUser);
 app.get("/users/:userId/gift-history", UserController.getGiftHistory);

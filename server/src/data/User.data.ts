@@ -18,6 +18,7 @@ export class User {
   id: string;
   username: string;
   decentraland_name: string;
+  decentraland_names: string[] = [];
   decentraland_profile: any;
   dharma_points: number;
   karma_points: number;
@@ -29,6 +30,8 @@ export class User {
     this.id = userConfig.id;
     this.username = userConfig.username;
     this.decentraland_name = userConfig.decentraland_name;
+    this.decentraland_names =
+      userConfig.decentraland_names || this.decentraland_names;
     this.decentraland_profile = userConfig.decentraland_profile;
     this.dharma_points = userConfig.dharma_points;
     this.karma_points = userConfig.karma_points;
@@ -39,7 +42,8 @@ export class User {
 }
 
 export class UserData {
-  public static readonly TABLE_NAME = process.env.NODE_ENV === "production" ? "CBI_Users" : "CBI_Users_Dev";
+  public static readonly TABLE_NAME =
+    process.env.NODE_ENV === "production" ? "CBI_Users" : "CBI_Users_Dev";
 
   static async createUser(user: User): Promise<void> {
     const params = {
@@ -61,10 +65,11 @@ export class UserData {
     const params: UpdateCommandInput = {
       TableName: this.TABLE_NAME,
       Key: { pk: user.pk, id: user.id },
-      UpdateExpression: `SET username = :username, decentraland_name = :decentraland_name, decentraland_profile = :decentraland_profile, avatar_url = :avatar_url`,
+      UpdateExpression: `SET username = :username, decentraland_name = :decentraland_name, decentraland_names = :decentraland_names, decentraland_profile = :decentraland_profile, avatar_url = :avatar_url`,
       ExpressionAttributeValues: {
         ":username": user.username,
         ":decentraland_name": user.decentraland_name,
+        ":decentraland_names": user.decentraland_names,
         ":decentraland_profile": user.decentraland_profile,
         ":avatar_url": user.avatar_url,
       },
@@ -76,6 +81,27 @@ export class UserData {
     } catch (error) {
       ErrorLoggerService.logError("Failed to update user", error);
       console.error("Error updating user in DynamoDB:", error);
+      throw error;
+    }
+  }
+
+  static async updateUserDisplayName(user: User): Promise<void> {
+    console.log(`Updating user with ID: ${user.id}, pk: ${user.pk}`);
+    const params: UpdateCommandInput = {
+      TableName: this.TABLE_NAME,
+      Key: { pk: user.pk, id: user.id },
+      UpdateExpression: `SET username = :username`,
+      ExpressionAttributeValues: {
+        ":username": user.username,
+      },
+    };
+
+    try {
+      const command = new UpdateCommand(params);
+      await dynamoDB.send(command);
+    } catch (error) {
+      ErrorLoggerService.logError("Failed to update user's display name", error);
+      console.error("Error updating username in DynamoDB:", error);
       throw error;
     }
   }
@@ -104,7 +130,7 @@ export class UserData {
       TableName: this.TABLE_NAME,
       Key: { pk: "cbi:user:account", id: userId },
       ProjectionExpression:
-        "id, username, decentraland_name, avatar_url, dharma_points, karma_points, created_at, last_calculation",
+        "id, username, decentraland_name, decentraland_names, avatar_url, dharma_points, karma_points, created_at, last_calculation",
     };
 
     try {

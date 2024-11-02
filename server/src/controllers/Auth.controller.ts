@@ -4,6 +4,8 @@ import { ethers } from "ethers";
 import { TokenService } from "../services/Token.service";
 import { UserLogic } from "../logic/User.logic";
 import crypto from "crypto";
+import { DecentralandService } from "../services/Decentraland.service";
+import { User } from "../data/User.data";
 
 export class AuthController {
   private static readonly MESSAGE_EXPIRATION_TIME = 90; // seconds
@@ -83,6 +85,17 @@ export class AuthController {
           });
         }
 
+        const user = userResponse.user;
+        const decentraland_names =
+          await DecentralandService.getAllDecentralandNames(user.id);
+        const decentraland_profile =
+          await DecentralandService.getDecentralandProfile(user.id);
+
+        user.decentraland_names = decentraland_names;
+        user.decentraland_profile = decentraland_profile;
+
+        await UserLogic.updateUser(new User(user));
+
         // Generate tokens
         const accessToken = TokenService.generateAccessToken(
           userResponse.user.id
@@ -137,6 +150,15 @@ export class AuthController {
       if (!user) {
         return res.status(400).json({ error: "User not found" });
       }
+      const decentraland_names =
+        await DecentralandService.getAllDecentralandNames(user.id);
+      const decentraland_profile =
+        await DecentralandService.getDecentralandProfile(user.id);
+
+      user.decentraland_names = decentraland_names;
+      user.decentraland_profile = decentraland_profile;
+
+      await UserLogic.updateUser(new User(user));
 
       const newAccessToken = TokenService.generateAccessToken(user.id);
       const newRefreshToken = TokenService.generateRefreshToken(user.id);

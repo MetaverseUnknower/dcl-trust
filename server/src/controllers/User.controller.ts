@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { UserLogic } from "../logic/User.logic";
 import { HistoryLogic } from "../logic/History.logic";
 import { User } from "../data/User.data";
+import { ErrorLoggerService } from "../services/ErrorLogger.service";
 
 export class UserController {
   static async getAllUsers(req: Request, res: Response) {
@@ -10,8 +11,46 @@ export class UserController {
       const users = await UserLogic.getAllUsers();
       res.json(users);
     } catch (error) {
+      ErrorLoggerService.logError(
+        "User.controller - Error fetching all users",
+        error
+      );
       console.error(
         "Error in user controller while fetching all users:",
+        error
+      );
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
+  static async updateUserDisplayName(req: Request, res: Response) {
+    try {
+      const { username } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId || !username) {
+        return res
+          .status(400)
+          .json({ error: "Missing required parameters: userId, displayName" });
+      }
+
+      const user = await UserLogic.getUser(userId.toLowerCase());
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      user.username = username;
+      await UserLogic.updateUserDisplayName(new User(user));
+
+      res.json({ message: "Display name updated successfully", username });
+    } catch (error) {
+      ErrorLoggerService.logError(
+        "User.controller - Error updating display name",
+        error
+      );
+      console.error(
+        "Error in user controller while updating display name:",
         error
       );
       res.status(500).json({ error: "Internal server error" });
@@ -43,6 +82,10 @@ export class UserController {
         });
       }
     } catch (error) {
+      ErrorLoggerService.logError(
+        "User.controller - Error getting or creating user",
+        error
+      );
       console.error(
         "Error in user controller while getting or creating user:",
         error
@@ -93,6 +136,10 @@ export class UserController {
         toUser: updatedToUser,
       });
     } catch (error) {
+      ErrorLoggerService.logError(
+        "User.controller - Error gifting Dharma",
+        error
+      );
       console.error("Error in user controller while gifting Dharma:", error);
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
@@ -106,9 +153,16 @@ export class UserController {
     try {
       const userId = req.params.userId;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
-      const history = await HistoryLogic.getUserGiftHistory(userId.toLowerCase(), limit);
+      const history = await HistoryLogic.getUserGiftHistory(
+        userId.toLowerCase(),
+        limit
+      );
       res.json(history);
     } catch (error) {
+      ErrorLoggerService.logError(
+        "User.controller - Error fetching gift history",
+        error
+      );
       console.error(
         "Error in user controller while fetching gift history:",
         error

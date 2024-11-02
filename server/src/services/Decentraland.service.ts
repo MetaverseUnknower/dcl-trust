@@ -158,6 +158,56 @@ export class DecentralandService {
     }
   }
 
+  static async getAllDecentralandNames(
+    address: string,
+    partialNames?: string[],
+    attempts: number = 0
+  ): Promise<any | null> {
+    try {
+      // First, get the owned Decentraland Name NFTs
+      const nfts = await alchemy.nft.getNftsForOwner(address, {
+        contractAddresses: ["0x2A187453064356c898cAe034EAed119E1663ACb8"], // Decentraland Names contract
+      });
+
+      const ownedNames = nfts.ownedNfts
+        .filter(
+          (nft) =>
+            nft.contract.address ===
+            "0x2A187453064356c898cAe034EAed119E1663ACb8"
+        )
+        .map((nft) => nft.name);
+
+      console.log("Owned names:", ownedNames);
+
+      const hasMissingNames = ownedNames.some((name) => !name);
+
+      if (partialNames && partialNames.length > 0 && hasMissingNames) {
+        // fill in any missing names
+        const missingNames = partialNames.filter(
+          (name) => !ownedNames.includes(name)
+        );
+        ownedNames.push(...missingNames);
+      } else if (partialNames && partialNames.length > 0) {
+        return ownedNames;
+      }
+
+      if (hasMissingNames && attempts < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        attempts++;
+        return this.getAllDecentralandNames(address, ownedNames, attempts);
+      } else if (hasMissingNames && attempts >= 3) {
+        return ownedNames.filter((name) => name);
+      } else if (ownedNames.length > 0 && !hasMissingNames) {
+        return ownedNames;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching Decentraland name:", error);
+      return null;
+    }
+  }
+
   static async getDecentralandProfile(address: string): Promise<any> {
     try {
       const response = await axios.get(

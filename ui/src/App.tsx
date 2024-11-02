@@ -72,7 +72,7 @@ export default function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [loggedInUserId, setLoggedInUserId] = useState<string>("Guest");
   const [isLoading, setIsLoading] = useState(true);
-  const [attemptingLogin, setAttemptingLogin] = useState(true);
+  const [attemptingLogin, setAttemptingLogin] = useState(false);
   const [cbiMetrics, setCbiMetrics] = useState<CBIMetrics>({
     karma_decay_rate: 0,
     dharma_accrual_rate: 0,
@@ -99,7 +99,6 @@ export default function App() {
     webSocket.setOnMessage((event) => {
       const data = JSON.parse(event.data);
       if (data.type === "update_points") {
-
         if (data.users.length === 0) {
           return;
         }
@@ -107,27 +106,32 @@ export default function App() {
         // Use a functional update to ensure the latest value of `users` is used.
         setUsers((prevUsers) => {
           // Create a map of the existing users for quick lookup
-          const prevUsersMap = new Map(prevUsers.map(user => [user.id, user]));
-        
+          const prevUsersMap = new Map(
+            prevUsers.map((user) => [user.id, user])
+          );
+
           // Update or add incoming users
           data.users.forEach((incomingUser: Partial<User>) => {
             if (incomingUser.id) {
               const existingUser = prevUsersMap.get(incomingUser.id);
               if (existingUser) {
                 // Merge the incoming data with the existing user
-                prevUsersMap.set(incomingUser.id, { ...existingUser, ...incomingUser });
+                prevUsersMap.set(incomingUser.id, {
+                  ...existingUser,
+                  ...incomingUser,
+                });
               } else {
                 // Add the incoming user if it's not already in the map
                 prevUsersMap.set(incomingUser.id, incomingUser as User);
               }
             }
           });
-        
+
           // Create an array from the updated map and sort it by karma points
           const updatedUsers = Array.from(prevUsersMap.values()).sort(
             (a, b) => b.karma_points - a.karma_points
           );
-        
+
           return updatedUsers;
         });
       }
@@ -216,14 +220,29 @@ export default function App() {
   );
 
   const restoreLoginSession = async () => {
-    if (!authService.getRefreshToken()) return;
+    if (attemptingLogin || !authService.getRefreshToken()) return;
 
+    setAttemptingLogin(true);
     const authResponse = await authService.restoreLoginSession();
-    const existingUser =
-      authResponse?.user &&
-      users.find((user) => user.id === authResponse.user.id);
+    setAttemptingLogin(false);
 
     if (authResponse.user) {
+      setUsers((prevUsers) => {
+        const existingUser = prevUsers.find(
+          (user) => user.id === authResponse.user.id
+        );
+        if (existingUser) {
+          // Update the existing user in the list
+          return prevUsers.map((user) =>
+            user.id === existingUser.id
+              ? { ...user, ...existingUser, ...authResponse.user }
+              : user
+          );
+        } else {
+          // Add the new user to the list
+          return [...prevUsers, authResponse.user];
+        }
+      });
       setLoggedInUserId(authResponse.user.id);
     }
   };
@@ -304,6 +323,7 @@ export default function App() {
         (a, b) => b.karma_points - a.karma_points
       );
       setUsers(sortedUsers);
+      return sortedUsers;
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -315,6 +335,7 @@ export default function App() {
     try {
       const metrics = await statsService.getCBIMetrics();
       setCbiMetrics(metrics);
+      return metrics;
     } catch (error) {
       console.error("Error fetching CBI metrics:", error);
       showMessage("Failed to fetch required metrics.", "error");
@@ -343,9 +364,9 @@ export default function App() {
           if (authResponse.success) {
             showMessage(authResponse.message, "success");
             setLoggedInUserId(authResponse.user.id);
-            fetchUsers(); // Refresh the user list after successful login
+            await fetchUsers(); // Refresh the user list after successful login
           } else if (authResponse.status === 202) {
-            console.log("Login failed:", authResponse.message);
+            console.error("Login failed:", authResponse.message);
             showMessage(
               authResponse.message || "Login failed. Please try again.",
               "error"
@@ -387,12 +408,40 @@ export default function App() {
     setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
   };
 
-
   const handleViewHistory = (userId: string) => {
     setSelectedUserId(userId);
   };
+
   const handleCloseHistory = () => {
     setSelectedUserId(null);
+  };
+
+  const handleUpdateDisplayName = async (newDisplayName: string) => {
+    if (!currentUser) {
+      showMessage("User not found. Please log in again.", "error");
+      return;
+    }
+
+    try {
+      const updatedUserName = await userService.updateUserDisplayName(
+        newDisplayName
+      );
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === currentUser.id
+            ? { ...user, username: updatedUserName }
+            : user
+        )
+      );
+      showMessage("Display name updated successfully.", "success");
+    } catch (error: any) {
+      console.error("Error updating display name:", error);
+      showMessage(
+        error.message || "Failed to update display name. Please try again.",
+        "error"
+      );
+    }
   };
 
   return (
@@ -449,6 +498,7 @@ export default function App() {
                 <LoggedInUserMetrics
                   user={currentUser}
                   onViewHistory={handleViewHistory}
+                  onUpdateDisplayName={handleUpdateDisplayName}
                 />
               )}
             </Grid>

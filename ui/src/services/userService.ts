@@ -9,6 +9,7 @@ export interface User {
   id: string;
   username: string;
   decentraland_name: string;
+  decentraland_names: string[];
   dharma_points: number;
   karma_points: number;
   created_at: string;
@@ -22,6 +23,36 @@ export const userService = {
     return response.data;
   },
 
+  async updateUserDisplayName(username: string): Promise<string> {
+    const accessToken = authService.getAccessToken();
+    if (!accessToken) {
+      throw new Error("User must be logged in to update display name");
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/users/update-display-name`,
+        { username },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      return response.data.username;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error(
+          error.response.data.error || "Failed to update display name"
+        );
+      }
+      throw new Error(
+        "An unexpected error occurred while updating display name"
+      );
+    }
+  },
+
   async giftDharma({
     recipientId,
     reason,
@@ -31,7 +62,14 @@ export const userService = {
     reason: string;
     amount: number;
   }): Promise<{ message: string; fromUser: User; toUser: User }> {
-    console.log("Gifting Dharma to", recipientId, "with reason:", reason, "and amount:", amount);
+    console.log(
+      "Gifting Dharma to",
+      recipientId,
+      "with reason:",
+      reason,
+      "and amount:",
+      amount
+    );
     const accessToken = authService.getAccessToken();
     if (!accessToken) {
       throw new Error("User must be logged in to gift Dharma");

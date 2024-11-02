@@ -7,6 +7,7 @@ export interface User {
   id: string;
   username: string;
   decentraland_name: string;
+  decentraland_names: string[];
   dharma_points: number;
   karma_points: number;
   created_at: string;

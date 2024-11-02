@@ -33,17 +33,24 @@ export class UserLogic {
     }
   }
 
+  static async updateUserDisplayName(user: User): Promise<void> {
+    try {
+      await UserData.updateUserDisplayName(user);
+    } catch (error) {
+      console.error("Error in user logic while updating user:", error);
+      throw error;
+    }
+  }
+
   static async createUser(
     userId: string
   ): Promise<{ status: number; message: string; user?: User }> {
     try {
       // Validate Decentraland name
-      const decentralandProfile =
+      const decentraland_profile =
         await DecentralandService.checkForDecentralandName(userId);
 
-      console.log("Decentraland profile:", decentralandProfile);
-
-      if (!decentralandProfile) {
+      if (!decentraland_profile) {
         return {
           status: 202,
           message: "User does not have a Decentraland name",
@@ -92,16 +99,20 @@ export class UserLogic {
         };
       }
 
+      const decentraland_names =
+        await DecentralandService.getAllDecentralandNames(userId);
+
       // Create user object
       const newUser: User = {
         pk: "cbi:user:account",
         id: userId,
-        username: decentralandProfile?.name,
-        decentraland_name: decentralandProfile?.name,
-        decentraland_profile: decentralandProfile,
+        username: decentraland_profile?.name,
+        decentraland_name: decentraland_profile?.name,
+        decentraland_names,
+        decentraland_profile,
         dharma_points: 0,
         karma_points: 0,
-        avatar_url: decentralandProfile?.avatar?.snapshots?.face256,
+        avatar_url: decentraland_profile?.avatar?.snapshots?.face256,
         created_at: new Date().toISOString(),
       };
 
@@ -133,10 +144,13 @@ export class UserLogic {
         const userProfile = await DecentralandService.getDecentralandProfile(
           user.id
         );
+        const decentraland_names =
+          await DecentralandService.getAllDecentralandNames(user.id);
 
         user.decentraland_profile = userProfile;
         user.avatar_url = userProfile?.avatar?.snapshots?.face256;
         user.decentraland_name = userProfile?.name;
+        user.decentraland_names = decentraland_names;
 
         await this.updateUser(new User(user));
         return { status: 200, message: "Welcome Back!", user };

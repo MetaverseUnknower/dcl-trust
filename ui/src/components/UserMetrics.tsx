@@ -84,7 +84,6 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
     setShowGiftDialog(true);
   };
 
-
   const handleScrollToTop = () => {
     if (sharedRef.current) {
       sharedRef.current.scrollIntoView({ behavior: "smooth" });
@@ -94,11 +93,11 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
   const handleViewHistory = (userId: string) => {
     onViewHistory(userId);
     handleScrollToTop();
-  }
+  };
 
   return (
     <>
-      <Card sx={{ mb: 2 }}>
+      <Card sx={{ mb: 2, pb: 2 }}>
         <CardContent sx={{ pb: 0 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <Avatar
@@ -156,7 +155,7 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
               color="info"
               onClick={() => handleViewHistory(user.id)}
               startIcon={<History />}
-              sx={{ mx: 4, my: 2, px: 2 }}
+              sx={{ mx: 4, mt: 2, px: 2 }}
             >
               View History
             </Button>
@@ -167,7 +166,7 @@ const UserMetrics: React.FC<UserMetricsProps> = ({
               color="secondary"
               onClick={() => openDialog(user)}
               startIcon={<CardGiftcard />}
-              sx={{ mx: 4, my: 2, px: 2 }}
+              sx={{ mx: 4, mt: 2, px: 2 }}
               disabled={!canGift}
             >
               Send Karma
