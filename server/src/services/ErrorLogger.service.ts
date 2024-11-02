@@ -57,7 +57,7 @@ export class ErrorLoggerService {
     }
 
     const discordMessage = {
-      content: "An error occurred in the Dharma Accrual Service",
+      content: "An error occurred in DCL Trust",
       embeds: [
         {
           title: "Error Details",

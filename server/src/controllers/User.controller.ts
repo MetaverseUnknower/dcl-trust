@@ -105,8 +105,8 @@ export class UserController {
   static async getGiftHistory(req: Request, res: Response) {
     try {
       const userId = req.params.userId;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const history = await HistoryLogic.getUserGiftHistory(userId, limit);
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const history = await HistoryLogic.getUserGiftHistory(userId.toLowerCase(), limit);
       res.json(history);
     } catch (error) {
       console.error(

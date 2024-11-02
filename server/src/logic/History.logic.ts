@@ -1,6 +1,7 @@
 // ./logic/History.logic.ts
 
 import { HistoryData, DharmaGiftLog } from "../data/History.data";
+import { ErrorLoggerService } from "../services/ErrorLogger.service";
 
 export class HistoryLogic {
   static async logDharmaGift(
@@ -22,6 +23,7 @@ export class HistoryLogic {
 
       await HistoryData.logDharmaGift(log);
     } catch (error) {
+      ErrorLoggerService.logError("History.logic - Error logging Dharma gift", error);
       console.error("Error in history logic while logging Dharma gift:", error);
       throw error;
     }
@@ -29,11 +31,12 @@ export class HistoryLogic {
 
   static async getUserGiftHistory(
     userId: string,
-    limit: number = 10
+    limit: number = 100
   ): Promise<DharmaGiftLog[]> {
     try {
       return await HistoryData.getUserGiftHistory(userId, limit);
     } catch (error) {
+      ErrorLoggerService.logError("History.logic - Error fetching user gift history", error);
       console.error(
         "Error in history logic while fetching user gift history:",
         error

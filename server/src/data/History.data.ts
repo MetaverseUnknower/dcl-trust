@@ -3,6 +3,7 @@
 import { databaseService } from "../services/Database.service";
 import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
+import { ErrorLoggerService } from "../services/ErrorLogger.service";
 
 export interface DharmaGiftLog {
   sk: string;
@@ -14,7 +15,8 @@ export interface DharmaGiftLog {
 }
 
 export class HistoryData {
-  private static readonly TABLE_NAME = process.env.NODE_ENV === "production" ? "CBI_History" : "CBI_History_Dev";
+  private static readonly TABLE_NAME =
+    process.env.NODE_ENV === "production" ? "CBI_History" : "CBI_History_Dev";
 
   static async logDharmaGift(log: Omit<DharmaGiftLog, "sk">): Promise<void> {
     const dynamoDB = databaseService.getDynamoDbClient();
@@ -39,7 +41,7 @@ export class HistoryData {
 
   static async getUserGiftHistory(
     userId: string,
-    limit: number = 10
+    limit: number = 100
   ): Promise<DharmaGiftLog[]> {
     const dynamoDB = databaseService.getDynamoDbClient();
 
@@ -49,7 +51,7 @@ export class HistoryData {
       FilterExpression: "fromUserId = :userId OR toUserId = :userId",
       ExpressionAttributeValues: {
         ":pk": "cbi:history:gift",
-        ":userId": userId,
+        ":userId": userId.toLowerCase(),
       },
       Limit: limit,
       ScanIndexForward: false, // to get the most recent gifts first
@@ -59,6 +61,7 @@ export class HistoryData {
       const result = await dynamoDB.send(new QueryCommand(params));
       return result.Items as DharmaGiftLog[];
     } catch (error) {
+      ErrorLoggerService.logError("Failed to fetch user gift history", error);
       console.error("Error fetching user gift history:", error);
       throw error;
     }

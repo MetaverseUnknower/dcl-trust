@@ -40,7 +40,6 @@ import { CBIMetrics, statsService } from "./services/statsService";
 import { webSocket } from "./services/websocketService";
 import logoLight from "./assets/images/logo-light.png";
 import logoDark from "./assets/images/logo-dark.png";
-import GiftDialog from "./components/GiftDialog";
 
 function SlideTransition(props: SlideProps) {
   return <Slide {...props} direction="down" />;
@@ -100,33 +99,36 @@ export default function App() {
     webSocket.setOnMessage((event) => {
       const data = JSON.parse(event.data);
       if (data.type === "update_points") {
-        console.log("Received updated points:", data);
 
         if (data.users.length === 0) {
-          console.log("No users to update..?");
           return;
         }
 
         // Use a functional update to ensure the latest value of `users` is used.
         setUsers((prevUsers) => {
-          const updatedUsers = data.users
-            .map((user: Partial<User>) => {
-              let updatedUser = prevUsers.find(
-                (storedUser) => storedUser.id === user.id
-              );
-
-              if (updatedUser) {
-                return { ...updatedUser, ...user };
+          // Create a map of the existing users for quick lookup
+          const prevUsersMap = new Map(prevUsers.map(user => [user.id, user]));
+        
+          // Update or add incoming users
+          data.users.forEach((incomingUser: Partial<User>) => {
+            if (incomingUser.id) {
+              const existingUser = prevUsersMap.get(incomingUser.id);
+              if (existingUser) {
+                // Merge the incoming data with the existing user
+                prevUsersMap.set(incomingUser.id, { ...existingUser, ...incomingUser });
+              } else {
+                // Add the incoming user if it's not already in the map
+                prevUsersMap.set(incomingUser.id, incomingUser as User);
               }
-              return undefined;
-            })
-            .filter((user: User) => user !== undefined);
-
-          const sortedUsers = [...updatedUsers].sort(
+            }
+          });
+        
+          // Create an array from the updated map and sort it by karma points
+          const updatedUsers = Array.from(prevUsersMap.values()).sort(
             (a, b) => b.karma_points - a.karma_points
           );
-
-          return sortedUsers;
+        
+          return updatedUsers;
         });
       }
     });

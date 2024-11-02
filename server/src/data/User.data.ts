@@ -8,6 +8,7 @@ import {
   UpdateCommand,
   UpdateCommandInput,
 } from "@aws-sdk/lib-dynamodb";
+import { ErrorLoggerService } from "../services/ErrorLogger.service";
 
 const dynamoDB = databaseService.getDynamoDbClient();
 
@@ -49,6 +50,7 @@ export class UserData {
       const command = new PutCommand(params);
       await dynamoDB.send(command);
     } catch (error) {
+      ErrorLoggerService.logError("Failed to create user", error);
       console.error("Error creating user in DynamoDB:", error);
       throw error;
     }
@@ -72,6 +74,7 @@ export class UserData {
       const command = new UpdateCommand(params);
       await dynamoDB.send(command);
     } catch (error) {
+      ErrorLoggerService.logError("Failed to update user", error);
       console.error("Error updating user in DynamoDB:", error);
       throw error;
     }
@@ -89,6 +92,7 @@ export class UserData {
       const result = await dynamoDB.send(command);
       return result.Items as Partial<User>[];
     } catch (error) {
+      ErrorLoggerService.logError("Failed to fetch users", error);
       console.error("Error fetching users from DynamoDB:", error);
       throw error;
     }
@@ -108,6 +112,7 @@ export class UserData {
       const result = await dynamoDB.send(command);
       return result.Item as User | null;
     } catch (error) {
+      ErrorLoggerService.logError("Failed to fetch user", error);
       console.error("Error fetching user from DynamoDB:", error);
       throw error;
     }
@@ -148,6 +153,7 @@ export class UserData {
       await dynamoDB.send(command);
     } catch (error) {
       console.error("Error gifting Dharma points:", error);
+      ErrorLoggerService.logError("Dharma gift failed", error);
       throw error;
     }
   }
