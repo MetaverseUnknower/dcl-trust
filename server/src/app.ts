@@ -29,19 +29,19 @@ app.get("/users/:userId/gift-history", UserController.getGiftHistory);
 app.get("/stats/cbi-metrics", StatsController.getCBIMetrics);
 
 // Run Dharma accrual check every minute
-cron.schedule("* * * * *", () => {
-  DharmaAccrualService.updateDharmaPointsAndDecayKarma()
-    .then(() => console.log("Dharma accrual update completed"))
-    .catch((error) =>
-      console.error("Error during Dharma accrual update:", error)
-    );
-});
+// cron.schedule("* * * * *", () => {
+//   DharmaAccrualService.updateDharmaPointsAndDecayKarma()
+//     .then(() => console.log("Dharma accrual update completed"))
+//     .catch((error) =>
+//       console.error("Error during Dharma accrual update:", error)
+//     );
+// });
 
 // Run an initial Dharma accrual check on startup
-DharmaAccrualService.updateDharmaPointsAndDecayKarma()
-  .then(() => console.log("Initial Dharma accrual check completed"))
-  .catch((error) =>
-    console.error("Error during initial Dharma accrual check:", error)
-  );
+// DharmaAccrualService.updateDharmaPointsAndDecayKarma()
+//   .then(() => console.log("Initial Dharma accrual check completed"))
+//   .catch((error) =>
+//     console.error("Error during initial Dharma accrual check:", error)
+//   );
 
 export default app;
